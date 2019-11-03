@@ -5,6 +5,18 @@ from sty import fg, bg, ef, rs, RgbFg
 from tqdm import tqdm
 
 
+def create_basic_color(rgb):
+    fg.set_style("colorr", RgbFg(*rgb))
+    c = fg.colorr.replace("38", "38")
+    return c
+
+
+class BasicColors:
+    WHITE = create_basic_color([255, 255, 255])
+    GREEN = create_basic_color([0, 255, 0])
+    ORANGE = create_basic_color([255, 125, 0])
+
+
 class Content:
 
     """
@@ -25,7 +37,7 @@ class Content:
     def table(self, value):
 
         self._table = value
-        self.d3 = self.create_container()
+        self.create_container()
 
     @property
     def size(self):
@@ -57,7 +69,10 @@ class Content:
         for i in range(d3.shape[-1]):
             d3[:, :, i] = self.table[i]
 
-        return d3
+        self.d3 = d3
+
+    def reload_size(self):
+        self.create_container()
 
     def revert_table(self):
         temp_table = list(self._table)[::-1]
@@ -72,7 +87,7 @@ class RGB:
     RGB image values are used as indexes that pulls out corresponding RGB terminal values from RGB charray cube
     
     Attributes:
-        cube (charray 3D cube): The cube has size based on resolution -> shape=[2^resolution,2^resolution,2^resolution]
+        cube (charray 3D cube): The cube has size based on resolution -> shape=[2**resolution,2**resolution,2**resolution]
     """
 
     def __init__(self):

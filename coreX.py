@@ -8,10 +8,15 @@ import numpy as np
 import types
 
 from dataloader import DataLoader
-from graphics import Content, RGB
+from graphics import Content, RGB, BasicColors
 
 
 class TerminalScreen:
+
+    """
+    Class that manages terminal window
+    """
+
     def init_clean(self):
         try:
             os.system("clear")
@@ -27,6 +32,57 @@ class TerminalScreen:
     def clear():
         print("\x1b[2J")
 
+    def size(self, ratio=1):
+        """
+        Get terminal size
+        
+        Args:
+            ratio (int, optional): fration of terminal sizes
+        
+        Returns:
+            tuple: width,height multiplied by ratio
+        """
+        # credits https://stackoverflow.com/questions/566746/how-to-get-linux-console-window-width-in-python
+        height, width = os.popen("stty size", "r").read().split()
+        return int(width)*ratio, int(height)*ratio
+
+    def adapt(self, ratio=1, width_multier=2.5):
+        """
+        Experimental size adaptation. Due to the fact that terminal height/width doesnt correspond
+        to frame width and height, it may need some refactor
+        
+        Args:
+            ratio (int, optional): Description
+            width_multier (float, optional): as is written in description. this value manipulates width
+        """
+        terminal_height, terminal_width = self.size(ratio=ratio)
+
+        class AutoResizer:
+            WIDTH_MULTIER = width_multier
+
+            def __init__(self, terminal_height, terminal_width, ratio):
+                self.terminal_height = terminal_height
+                self.terminal_width = terminal_width
+                self.terminal_ratio = terminal_width / terminal_height
+                self.ratio = ratio
+
+            def __call__(self, frame):
+                return self.adapt_size(frame.shape)
+
+            def adapt_size(self, shape):
+                frame_height, frame_width = shape[0], shape[1]
+                frame_ratio = frame_height / frame_width
+                # print(frame_ratio ,self.terminal_ratio)
+                w_resizer = terminal_width / frame_width
+                h_resizer = terminal_height / frame_height
+                resizer = min([w_resizer, h_resizer])
+                return (
+                    int(frame_width * resizer * ratio * self.WIDTH_MULTIER),
+                    int(frame_height * resizer * ratio),
+                )
+
+        return AutoResizer(terminal_height, terminal_width, ratio)
+
 
 class Core(Content, RGB):
 
@@ -34,12 +90,15 @@ class Core(Content, RGB):
     and very fastly add colors
     
     Attributes:
+        adapt_size (class): auto frame resizer
         cube (np.array): 3Dim array of colors - color is composed of terminal code for each rgb value
         div_resolution (TYPE): value that helps to build up cube
         rgb (Bool): rgb or black/white output
-        shape (TYPE): Description
         size (TYPE): Output size into terminal
         table (str): string of symbols to be used
+    
+    Deleted Attributes:
+        shape (TYPE): Description
     """
 
     def __init__(self, width=30, height=30, resolution=6, rgb=True):
@@ -48,11 +107,12 @@ class Core(Content, RGB):
 
         self.rgb = rgb
         self.size = (width, height)
-        # self.table = u" . . . ....:.:.::::::;;;;;======+=+++|+|+|+||||i|iiiiililllIIvIvvvvvnvnnnnooo2o2222S2SSSSXXXXZZZZZZ#Z#Z#####mmBmBmWBWWBWWWWQQQ"
-        # self.table_ = u"■"
-        self.table = u"■"
+        self.table = u" . . . ....:.:.::::::;;;;;======+=+++|+|+|+||||i|iiiiililllIIvIvvvvvnvnnnnooo2o2222S2SSSSXXXXZZZZZZ#Z#Z#####mmBmBmWBWWBWWWWQQQ"
         self.div_resolution = 256 / (2 ** resolution)
-        self.cube = self.load_cube(resolution=resolution)
+        if rgb:
+            self.cube = self.load_cube(resolution=resolution)
+        self.adapt_size = None
+        self._frame_size = (0, 0, 0)
 
     def view(self, img):
         return np.int64(img.reshape(img.shape[0] * img.shape[1]))
@@ -86,7 +146,6 @@ class Core(Content, RGB):
         Returns:
             2D array: unit8 frame
         """
-        self.shape = frame.shape[:2]
         if len(frame.shape) == 2:
             frame = frame / self._table_size
         return np.uint8(cv2.resize(frame, (self.size[0], self.size[1])))
@@ -126,7 +185,18 @@ class Core(Content, RGB):
         Returns:
             2D chararray: reshaped chararrays almost ready for flushing
         """
+
         if frame is not None:
+            if self.adapt_size is not None:
+
+                if frame.shape != self._frame_size:
+                    self.size = self.adapt_size(frame)
+                    self.create_container()
+
+                self._frame_size = frame.shape
+
+        if frame is not None:
+
             frame = self.resize(frame)
             if rgb_frame is not None and self.rgb:
                 if len(rgb_frame.shape) == 3:
@@ -158,7 +228,7 @@ class Core(Content, RGB):
 
 
 class Engine:
-    def __init__(self, media=None, core=None):
+    def __init__(self, media=None, core=None,show_fps = False):
         if isinstance(media, str):
             self.media = DataLoader()(media)
         if isinstance(media, types.GeneratorType):
@@ -167,6 +237,8 @@ class Engine:
         self.core = core
         self.screen = None
         self._timestamp = time.time()
+        self.performance = 0
+        self.show_fps = show_fps
 
     def sleep(self, fps=30):
         """
@@ -186,16 +258,19 @@ class Engine:
         Returns:
             Bool: True if image was propagated and is ready to be flushed
         """
+        time_start= time.time()
         try:
             self.last_images = self.media.__next__()
             self.screen = self.core.blend(
                 frame=self.last_images[0], rgb_frame=self.last_images[1]
             )
+            self.performance = round(1/(time.time()-time_start),2)
             return True
         except Exception as e:
             print(e)
+            self.performance = (time.time()-time_start)
             return None
-
+        
     def render(self):
         """
         Flush chararray if is ready and commit time for FPS controller
@@ -203,3 +278,6 @@ class Engine:
         if self.screen is not None:
             self.core._render(self.screen)
             self._timestamp = time.time()
+        if self.show_fps:
+            
+            print(f"{BasicColors.WHITE}Calculation performance: --{self.performance}--")

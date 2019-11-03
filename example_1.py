@@ -5,11 +5,24 @@ from coreX import Core, TerminalScreen, Engine
 colorama.init()
 
 
+TS = TerminalScreen()
+
+
 # Create core
 # - width and height corresponds to terminal size
 # - resolution - number of channel colors -> 2**resolution. 8 is max
-core = Core(width=80, height=40, resolution=6, rgb=True)
-core.table = u"■"
+core = Core(resolution=6, rgb=False)
+
+#
+# Adapt image size for terminal
+core.adapt_size = TS.adapt(ratio=0.75)
+
+# define ascii table. This one is actually default
+core.table = u" . . . ....:.:.::::::;;;;;======+=+++|+|+|+||||i|iiiiililllIIvIvvvvvnvnnnnooo2o2222S2SSSSXXXXZZZZZZ#Z#Z#####mmBmBmWBWWBWWWWQQQ"
+
+# revert table
+#core.revert_table()
+
 
 # create Pipeline
 # media - link or path to image/YTvideo, or generator returning images
@@ -19,11 +32,11 @@ tube = Engine(
 )
 
 # clean screen
-TS = TerminalScreen()
 TS.init_clean()
 
 # push image through pipeline and returns True if succesful
 if tube.propagate():
+	
     # move cursor to 0,0 in terminal for quick override
     TS.fast_clean()
 

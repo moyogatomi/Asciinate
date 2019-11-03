@@ -98,9 +98,8 @@ class DataLoader(Image):
             vPafy = pafy.new(media)
             play = vPafy.getbest(preftype="webm")
             streams = vPafy.streams
-            for s in streams:
-                print(s)
-            print(play.url)
+            # for s in streams:
+            #    print(s)
             capture = cv2.VideoCapture(play.url)
 
         if method == "local":
