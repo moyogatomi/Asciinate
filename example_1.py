@@ -36,7 +36,7 @@ TS.init_clean()
 
 # push image through pipeline and returns True if succesful
 if tube.propagate():
-	
+
     # move cursor to 0,0 in terminal for quick override
     TS.fast_clean()
 

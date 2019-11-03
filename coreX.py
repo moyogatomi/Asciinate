@@ -23,8 +23,8 @@ class TerminalScreen:
         except:
             os.system("cls")
 
-    def fast_clean(self):
-        self.move_cursor(0, 0)
+    def fast_clean(self,x=0,y=0):
+        self.move_cursor(x, y)
 
     def move_cursor(self, x, y):
         print("\x1b[{};{}H".format(y + 1, x + 1))
