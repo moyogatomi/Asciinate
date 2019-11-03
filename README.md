@@ -1,37 +1,43 @@
+
+
 Existence of this mini project cannot be justified
 
 ## Asciinator
+
+![](https://github.com/moyogatomi/ImVid2Ascii/blob/master/showcase.gif)
 
 # Description
 
 fast transformation of grayscale and rgb images into custom ascii letters
 
-# Example showcase
-
-![](https://github.com/moyogatomi/ImVid2Ascii/blob/master/showcase.gif)
+support for youtube stream (not all videos are working)
 
 # Usage
 
 1) install requirements
 
 2) init colorama
+```python
 
 import colorama
 
 colorama.init()
+```
 
 3) import core and pipeline modules
-
+```python
 from coreX import Core, TerminalScreen, Engine
+```
 
 4) Create Terminal controller
-
+```python
 TS = TerminalScreen()
+```
 
 5) Initialize core
-
+```python
 # resolution - number of colors in a channel  -> 2**resolution. 8 is max. Use 8 unless you want to carry extra 400mb in RAM
-core = Core(resolution=6, rgb=False)
+core = Core(resolution=6, rgb=True)
 
 # dont care about image size and leave it to Terminal Controller
 core.adapt_size = TS.adapt(ratio=0.75)
@@ -41,7 +47,6 @@ core.table = u" . . . ....:.:.::::::;;;;;======+=+++|+|+|+||||i|iiiiililllIIvIvv
 
 # create Pipeline
 # media - link or path to image/YTvideo, or generator returning tuple(grayscale_image,rgb_image)
-
 tube = Engine(
     media="url or path to image/YT stream or generator",
     core=core,
@@ -58,7 +63,6 @@ if tube.propagate():
 
     # Flush result into terminal
     tube.render()
+```
 
-
-For more use cases checkout examples
-
+### For more use cases checkout examples
