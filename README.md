@@ -8,7 +8,7 @@ fast transformation of grayscale and rgb images into custom ascii letters
 
 # Example showcase
 
-![](https://github.com/moyogatomi/ImVid2Ascii/showcase.gif)
+![](https://github.com/moyogatomi/ImVid2Ascii/blob/master/showcase.gif)
 
 # Usage
 
