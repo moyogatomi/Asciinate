@@ -91,7 +91,7 @@ indexes = np.where(image_mask==0)
 for i in range(d3.shape[-1]):
     d3[:,:,i]=table[i]
 
-RGB = np.load('colorWin.npy')
+#RGB = np.load('colorWin.npy')
 
 
 
