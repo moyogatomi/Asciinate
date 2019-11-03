@@ -2,20 +2,24 @@
 
 Existence of this mini project cannot be justified
 
-## Asciinator
+# Asciinate
 
 ![](https://github.com/moyogatomi/ImVid2Ascii/blob/master/showcase.gif)
 
-# Description
+## Description
 
 fast transformation of grayscale and rgb images into custom ascii letters
 
 support for youtube stream (not all videos are working)
 
-# Usage
+## Usage
 
-1) install requirements
+0) have python >= 3.6
 
+1) install requirements (virtualenv)
+```bash
+pip install -r requirements
+```
 2) init colorama
 ```python
 
