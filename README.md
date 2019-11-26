@@ -4,7 +4,7 @@ Existence of this mini project cannot be justified
 
 # Asciinate
 
-![](https://github.com/moyogatomi/ImVid2Ascii/blob/master/showcase.gif)
+![](https://github.com/moyogatomi/Asciinate/blob/master/showcase.gif)
 
 ## Description
 
