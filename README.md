@@ -1,7 +1,3 @@
-
-
-Existence of this mini project cannot be justified
-
 # Asciinate
 
 ![](https://github.com/moyogatomi/Asciinate/blob/master/showcase.gif)
